@@ -1,0 +1,65 @@
+[project]
+name = "deck-evaluator"
+version = "0.1.0"
+description = "Workspace root for the Deck Evaluator backend"
+requires-python = ">=3.14,<3.15"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["apps/api", "apps/worker", "packages/py/core"]
+
+[tool.uv.sources]
+deck-core = { workspace = true }
+deck-api = { workspace = true }
+deck-worker = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0",
+    "pytest-asyncio>=1.2",
+    "pytest-cov>=6.0",
+    "testcontainers[postgres]>=4.10",
+    "mypy>=1.18",
+    "ruff>=0.14",
+    "import-linter>=2.3",
+    "reportlab>=4.2",
+    "types-openpyxl",
+    "deck-core",
+    "deck-api",
+    "deck-worker",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+src = ["packages/py/core/src", "apps/api/src", "apps/worker/src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC", "S", "PL", "RUF", "TID", "C4", "PT", "RET"]
+ignore = ["PLR0913", "PLR2004"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101", "S105", "S106", "PLR0915"]
+"db/migrations/**" = ["S608"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+plugins = ["pydantic.mypy"]
+mypy_path = ["packages/py/core/src", "apps/api/src", "apps/worker/src"]
+explicit_package_bases = true
+namespace_packages = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+testpaths = ["packages/py/core/tests", "apps/api/tests"]
+markers = ["integration: needs Docker (PostgreSQL through testcontainers)"]
+addopts = "-ra --strict-markers"
